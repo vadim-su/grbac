@@ -1,10 +1,11 @@
 package grbac
 
 import (
-	"sync"
 	"testing"
 	"time"
 )
+
+const duration = 100 * time.Millisecond
 
 func BenchmarkChainCheckPermissions(b *testing.B) {
 	permA := "PermA"
@@ -38,38 +39,35 @@ func BenchmarkChainCheckPermissions(b *testing.B) {
 	roleE.SetParent(roleD)
 
 	go func() {
-		for {
-			roleE.Permit("NewPermission")
-			time.Sleep(5 * time.Millisecond)
+		exist := false
+		tick := time.Tick(duration)
+
+		for _ = range tick {
+			if exist {
+				roleE.Revoke("NewPermission")
+				exist = false
+			} else {
+				roleE.Permit("NewPermission")
+				exist = true
+			}
 		}
 	}()
-
-	go func() {
-		for {
-			roleE.Revoke("NewPermission")
-			time.Sleep(5 * time.Millisecond)
-		}
-	}()
-
-	wg := sync.WaitGroup{}
-	wg.Add(b.N)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		go func() {
-			if !(roleE.IsAllowed(permA) &&
-				roleE.IsAllowed(permB) &&
-				roleE.IsAllowed(permC) &&
-				roleE.IsAllowed(permD) &&
-				roleE.IsAllowed(permD1) &&
-				roleE.IsAllowed(permE)) {
-				b.Error("Expected that RoleE has all permissions")
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
+	b.RunParallel(
+		func(pb *testing.PB) {
+			for pb.Next() {
+				if !(roleE.IsAllowed(permA) &&
+					roleE.IsAllowed(permB) &&
+					roleE.IsAllowed(permC) &&
+					roleE.IsAllowed(permD) &&
+					roleE.IsAllowed(permD1) &&
+					roleE.IsAllowed(permE)) {
 
+					b.Error("Expected that RoleE has all permissions")
+				}
+			}
+		})
 }
 
 func BenchmarkLineCheckPermissions(b *testing.B) {
@@ -104,30 +102,27 @@ func BenchmarkLineCheckPermissions(b *testing.B) {
 	roleE.SetParent(roleD)
 
 	go func() {
-		for {
-			roleE.Permit("NewPermission")
-			time.Sleep(5 * time.Millisecond)
+		exist := false
+		tick := time.Tick(duration)
+
+		for _ = range tick {
+			if exist {
+				roleE.Revoke("NewPermission")
+				exist = false
+			} else {
+				roleE.Permit("NewPermission")
+				exist = true
+			}
 		}
 	}()
-
-	go func() {
-		for {
-			roleE.Revoke("NewPermission")
-			time.Sleep(5 * time.Millisecond)
-		}
-	}()
-
-	wg := sync.WaitGroup{}
-	wg.Add(b.N)
 
 	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		go func() {
-			if !roleE.IsAllowed(permA, permB, permC, permD, permD1, permE) {
-				b.Error("Expected that RoleE has all of these permissions")
+	b.RunParallel(
+		func(pb *testing.PB) {
+			for pb.Next() {
+				if !roleE.IsAllowed(permA, permB, permC, permD, permD1, permE) {
+					b.Error("Expected that RoleE has all of these permissions")
+				}
 			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
+		})
 }
