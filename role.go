@@ -114,7 +114,7 @@ func (r *Role) IsAllowed(perms ...string) bool {
 
 	for _, perm := range perms {
 
-		if _, ok := r.permissions[perm]; ok {
+		if r.permissions[perm] {
 			continue
 		}
 
