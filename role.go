@@ -89,7 +89,6 @@ func (r *Role) AllPermissions() map[string]bool {
 	}
 
 	return newPerms
-
 }
 
 // Permit adds a permission for to the role.
@@ -184,7 +183,6 @@ func (r *Role) AllParents() map[string]Roler {
 	}
 
 	return newParents
-
 }
 
 // HasParent checks direct parent in the role

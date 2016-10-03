@@ -1,6 +1,6 @@
 # GRBAC [![Build Status](https://travis-ci.org/deterok/grbac.svg?branch=master)](https://travis-ci.org/deterok/grbac) [![Coverage Status](https://coveralls.io/repos/github/deterok/grbac/badge.svg?branch=master)](https://coveralls.io/github/deterok/grbac?branch=master) [![GoDoc](https://godoc.org/github.com/deterok/grbac?status.svg)](https://godoc.org/github.com/deterok/grbac)
 
-GRBAC is a fast Golang library provides a role-based access control.
+GRBAC is a fast Golang library which provides a role-based access control.
 
 The project is written with a focus on performance, minimalism, and a small number of abstractions.
 
