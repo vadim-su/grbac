@@ -78,13 +78,13 @@ func (r *Role) AllPermissions() map[string]bool {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	for k, v := range r.permissions {
-		newPerms[k] = v
+	for permission := range r.permissions {
+		newPerms[permission] = true
 	}
 
-	for _, p := range r.parents {
-		for k, v := range p.AllPermissions() {
-			newPerms[k] = v
+	for _, parent := range r.parents {
+		for permisson := range parent.AllPermissions() {
+			newPerms[permisson] = true
 		}
 	}
 
