@@ -11,6 +11,12 @@ Run this command
 go get -v github.com/deterok/grbac
 ```
 
+or
+
+```sh
+go get -v gopkg.in/deterok/grbac.v0
+```
+
 ## Usage
 ```go
 // Create User role
