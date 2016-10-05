@@ -12,7 +12,7 @@ import (
 var (
 	ErrRoleHasAlreadyPerm   = errors.New("role already has permission")
 	ErrRoleNotPerm          = errors.New("role does not have permission")
-	ErrRoleHasAlreadyParent = errors.New("role already has the parent ")
+	ErrRoleHasAlreadyParent = errors.New("role already has the parent")
 	ErrNoParent             = errors.New("parent does not exist")
 )
 
