@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const duration = 100 * time.Millisecond
+const duration = 10 * time.Millisecond
 
 func BenchmarkChainCheckPermissions(b *testing.B) {
 	permA := "PermA"
