@@ -27,6 +27,7 @@ type Roler interface {
 	Revoke(string) error
 	Parents() map[string]Roler
 	AllParents() map[string]Roler
+	GetParent(string) Roler
 	HasParent(string) bool
 	SetParent(Roler) error
 	RemoveParent(string) error
@@ -183,6 +184,15 @@ func (r *Role) AllParents() map[string]Roler {
 	}
 
 	return newParents
+}
+
+// GetParent returns the parent by the name if it is in this role.
+// If this parent is not in the role, the function returns nil
+func (r *Role) GetParent(name string) Roler {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	return r.parents[name]
 }
 
 // HasParent checks direct parent in the role

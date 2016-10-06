@@ -287,3 +287,34 @@ func TestRoleIsAllowedMultipleArguments(t *testing.T) {
 		t.Logf("RoleE: %v", roleE.AllPermissions())
 	}
 }
+
+func TestRoleGetParent(t *testing.T) {
+	permA := "PermA"
+	permB := "PermB"
+
+	roleA := NewRole("RoleA")
+	roleA.Permit(permA)
+
+	roleB := NewRole("RoleB")
+	roleB.Permit(permB)
+	roleB.SetParent(roleA)
+
+	if p := roleB.GetParent(roleA.Name()); p == nil {
+		t.Errorf("expected that RoleB has RoleA as a perent")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+
+	}
+
+	if p := roleB.GetParent("No Role!"); p != nil {
+		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+
+	}
+
+	roleB.RemoveParent(roleA.Name())
+
+	if p := roleB.GetParent(roleA.Name()); p != nil {
+		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+	}
+}
