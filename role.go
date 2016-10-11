@@ -10,10 +10,10 @@ import (
 
 //Error codes returned by failures to change roles.
 var (
-	ErrRoleHasAlreadyPerm   = errors.New("role already has permission")
-	ErrRoleNotPerm          = errors.New("role does not have permission")
-	ErrRoleHasAlreadyParent = errors.New("role already has the parent")
-	ErrNoParent             = errors.New("parent does not exist")
+	ErrRoleHasPerm   = errors.New("role already has permission")
+	ErrRoleNotPerm   = errors.New("role does not have permission")
+	ErrRoleHasParent = errors.New("role already has the parent")
+	ErrNoParent      = errors.New("parent does not exist")
 )
 
 // Roler represents a role in RBAC and describes minimum set of functions
@@ -100,7 +100,7 @@ func (r *Role) Permit(perm string) error {
 	defer r.mutex.Unlock()
 
 	if r.permissions[perm] {
-		return ErrRoleHasAlreadyPerm
+		return ErrRoleHasPerm
 	}
 	r.permissions[perm] = true
 	return nil
@@ -211,7 +211,7 @@ func (r *Role) SetParent(role Roler) error {
 	defer r.mutex.Unlock()
 
 	if _, ok := r.parents[role.Name()]; ok {
-		return ErrRoleHasAlreadyParent
+		return ErrRoleHasParent
 	}
 
 	r.parents[role.Name()] = role

@@ -19,7 +19,7 @@ func TestRoleSetPermissions(t *testing.T) {
 
 	err := roleUser.Permit(permSendMsg)
 	if err == nil {
-		t.Errorf("expected \"%v\"", ErrRoleHasAlreadyPerm)
+		t.Errorf("expected \"%v\"", ErrRoleHasPerm)
 	}
 }
 
