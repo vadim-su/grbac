@@ -119,19 +119,18 @@ func (r *CachedRole) Revoke(perm string) error {
 }
 
 func (r *CachedRole) SetParent(role Roler) error {
-	r.mutex.Lock()
-
 	c, ok := role.(CachedRoler)
 	if !ok {
 		return errors.New("Not CachedRoler!")
 	}
 
-	c.SetChild(r)
+	if err := c.SetChild(r); err != nil {
+		return err
+	}
 
 	if err := r.Role.SetParent(role); err != nil {
 		return err
 	}
-	r.mutex.Unlock()
 
 	r.UpdateCache()
 	return nil
