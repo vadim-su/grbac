@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-type NewFunc func(string) Roler
-
 func generateHierarchy(newFunc NewFunc, countParents, deep, countPerms int) Roler {
 	root := newFunc("root")
 	generateLevels(newFunc, root, countParents, deep, countPerms)

@@ -2,6 +2,8 @@ package grbac
 
 import "testing"
 
+type NewFunc func(string) Roler
+
 func newRole(name string) Roler {
 	return NewRole(name)
 }
