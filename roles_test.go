@@ -2,11 +2,19 @@ package grbac
 
 import "testing"
 
-func TestRoleSetPermissions(t *testing.T) {
+func newRole(name string) Roler {
+	return NewRole(name)
+}
+
+func newCachedRole(name string) Roler {
+	return NewCachedRole(name)
+}
+
+func setPermissions(newFunc NewFunc, t *testing.T) {
 	permOpenSite := "OpenSite"
 	permSendMsg := "SendMsg"
 	permEditMsg := "EditMsg"
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 
 	roleUser.Permit(permOpenSite)
 	roleUser.Permit(permSendMsg)
@@ -23,11 +31,11 @@ func TestRoleSetPermissions(t *testing.T) {
 	}
 }
 
-func TestRoleRevokePermissions(t *testing.T) {
+func revokePermissions(newFunc NewFunc, t *testing.T) {
 	permOpenSite := "OpenSite"
 	permSendMsg := "SendMsg"
 	permEditMsg := "EditMsg"
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 
 	roleUser.Permit(permOpenSite)
 	roleUser.Permit(permSendMsg)
@@ -48,69 +56,64 @@ func TestRoleRevokePermissions(t *testing.T) {
 	}
 }
 
-func TestRoleSetParents(t *testing.T) {
-	roleGeneral := NewRole("General")
+func setParents(newFunc NewFunc, t *testing.T) {
+	roleGeneral := newFunc("General")
 
-	roleNotApproved := NewRole("NotApproved")
+	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleAdmin := NewRole("Admin")
+	roleAdmin := newFunc("Admin")
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
 		t.Error(err)
 	}
 
-	pNames := getParentsNamesRecursive(roleAdmin)
 	parents := roleAdmin.AllParents()
 
-	for _, name := range pNames {
-		if _, ok := parents[name]; !ok {
-			t.Errorf("AllParents method returned an incorrect value:"+
-				" name \"%v\" not found", name)
-		}
+	onError := func(name string) {
+		t.Errorf("AllParents method returned an incorrect value:"+
+			" name \"%v\" not found", name)
+	}
+
+	if _, generalOk := parents[roleGeneral.Name()]; !generalOk {
+		onError(roleGeneral.Name())
+	}
+
+	if _, NAOk := parents[roleNotApproved.Name()]; !NAOk {
+		onError(roleNotApproved.Name())
+	}
+
+	if _, userOk := parents[roleUser.Name()]; !userOk {
+		onError(roleUser.Name())
 	}
 }
 
-func getParentsNamesRecursive(r Roler) []string {
-	var names []string
+func removeParents(newFunc NewFunc, t *testing.T) {
+	roleGeneral := newFunc("General")
 
-	for pName, p := range r.Parents() {
-		names = append(names, pName)
-		subParentNames := getParentsNamesRecursive(p)
-
-		for _, subParentName := range subParentNames {
-			names = append(names, subParentName)
-		}
-	}
-	return names
-}
-
-func TestRoleRemoveParent(t *testing.T) {
-	roleGeneral := NewRole("General")
-
-	roleNotApproved := NewRole("NotApproved")
+	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleAdmin := NewRole("Admin")
+	roleAdmin := newFunc("Admin")
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
@@ -143,22 +146,22 @@ func TestRoleRemoveParent(t *testing.T) {
 	}
 }
 
-func TestRoleHasParent(t *testing.T) {
-	roleGeneral := NewRole("General")
+func hasParent(newFunc NewFunc, t *testing.T) {
+	roleGeneral := newFunc("General")
 
-	roleNotApproved := NewRole("NotApproved")
+	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleAdmin := NewRole("Admin")
+	roleAdmin := newFunc("Admin")
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
@@ -179,19 +182,19 @@ func TestRoleHasParent(t *testing.T) {
 	}
 }
 
-func TestRoleSetPermissionsForMultipleParents(t *testing.T) {
+func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 	permGeneral := "GeneralPerm"
 	permNotApproved := "NotApprovedPerm"
 	permUser := "UserPerm"
 	permAdmin := "AdminPerm"
 
-	roleGeneral := NewRole("General")
+	roleGeneral := newFunc("General")
 	err := roleGeneral.Permit(permGeneral)
 	if err != nil {
 		t.Error(err)
 	}
 
-	roleNotApproved := NewRole("NotApproved")
+	roleNotApproved := newFunc("NotApproved")
 	err = roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
 		t.Error(err)
@@ -202,7 +205,7 @@ func TestRoleSetPermissionsForMultipleParents(t *testing.T) {
 		t.Error(err)
 	}
 
-	roleUser := NewRole("User")
+	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
 		t.Error(err)
@@ -213,7 +216,7 @@ func TestRoleSetPermissionsForMultipleParents(t *testing.T) {
 		t.Error(err)
 	}
 
-	roleAdmin := NewRole("Admin")
+	roleAdmin := newFunc("Admin")
 	err = roleAdmin.Permit(permAdmin)
 	if err != nil {
 		t.Error(err)
@@ -244,7 +247,7 @@ func TestRoleSetPermissionsForMultipleParents(t *testing.T) {
 	}
 }
 
-func TestRoleIsAllowedMultipleArguments(t *testing.T) {
+func isAllowedMultipleArguments(newFunc NewFunc, t *testing.T) {
 	permA := "PermA"
 	permB := "PermB"
 	permC := "PermC"
@@ -252,24 +255,24 @@ func TestRoleIsAllowedMultipleArguments(t *testing.T) {
 	permD1 := "PermD1"
 	permE := "PermE"
 
-	roleA := NewRole("RoleA")
+	roleA := newFunc("RoleA")
 	roleA.Permit(permA)
 
-	roleB := NewRole("RoleB")
+	roleB := newFunc("RoleB")
 	roleB.Permit(permB)
 
-	roleC := NewRole("RoleC")
+	roleC := newFunc("RoleC")
 	roleC.Permit(permC)
 	roleC.SetParent(roleA)
 	roleC.SetParent(roleB)
 
-	roleD := NewRole("RoleD")
+	roleD := newFunc("RoleD")
 	roleD.Permit(permD)
 	roleD.Permit(permD1)
 	roleD.SetParent(roleA)
 	roleD.SetParent(roleC)
 
-	roleE := NewRole("RoleE")
+	roleE := newFunc("RoleE")
 	roleE.Permit(permE)
 	roleE.SetParent(roleA)
 	roleE.SetParent(roleC)
@@ -288,14 +291,14 @@ func TestRoleIsAllowedMultipleArguments(t *testing.T) {
 	}
 }
 
-func TestRoleGetParent(t *testing.T) {
+func getParent(newFunc NewFunc, t *testing.T) {
 	permA := "PermA"
 	permB := "PermB"
 
-	roleA := NewRole("RoleA")
+	roleA := newFunc("RoleA")
 	roleA.Permit(permA)
 
-	roleB := NewRole("RoleB")
+	roleB := newFunc("RoleB")
 	roleB.Permit(permB)
 	roleB.SetParent(roleA)
 
@@ -317,4 +320,68 @@ func TestRoleGetParent(t *testing.T) {
 		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
 		t.Logf("RoleB parents: %v", roleB.AllParents())
 	}
+}
+
+func TestDefaultRoleSetPermissions(t *testing.T) {
+	setPermissions(newRole, t)
+}
+
+func TestCachedRoleSetPermissions(t *testing.T) {
+	setPermissions(newCachedRole, t)
+}
+
+func TestDefaultRoleRevokePermissions(t *testing.T) {
+	revokePermissions(newRole, t)
+}
+
+func TestCachedRoleRevokePermissions(t *testing.T) {
+	revokePermissions(newCachedRole, t)
+}
+
+func TestDefaultRoleSetParent(t *testing.T) {
+	setParents(newRole, t)
+}
+
+func TestCachedRoleSetParent(t *testing.T) {
+	setParents(newCachedRole, t)
+}
+
+func TestDefaultRoleRemoveParent(t *testing.T) {
+	removeParents(newRole, t)
+}
+
+func TestCachedRoleRemoveParent(t *testing.T) {
+	removeParents(newCachedRole, t)
+}
+
+func TestDefaultRoleHasParent(t *testing.T) {
+	hasParent(newRole, t)
+}
+
+func TestCachedRoleHasParent(t *testing.T) {
+	hasParent(newCachedRole, t)
+}
+
+func TestDefaultRoleSetPermissionsForMultipleParents(t *testing.T) {
+	setPermissionsForMultipleParents(newRole, t)
+}
+
+func TestCachedRoleSetPermissionsForMultipleParents(t *testing.T) {
+	setPermissionsForMultipleParents(newCachedRole, t)
+}
+
+func TestDefaultRoleIsAllowedMultipleArguments(t *testing.T) {
+	isAllowedMultipleArguments(newRole, t)
+}
+
+func TestCachedRoleIsAllowedMultipleArguments(t *testing.T) {
+	isAllowedMultipleArguments(newCachedRole, t)
+}
+
+func TestDefaultRoleGetParent(t *testing.T) {
+	getParent(newRole, t)
+}
+
+func TestCachedRoleGetParent(t *testing.T) {
+	getParent(newCachedRole, t)
 }
