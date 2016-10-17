@@ -102,10 +102,7 @@ func (r *CachedRole) Permit(perm string) error {
 		return err
 	}
 
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	r.permsCache[perm] = true
+	r.UpdateCache()
 	return nil
 }
 
