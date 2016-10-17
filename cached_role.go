@@ -8,7 +8,7 @@ import (
 var (
 	ErrRoleHasChild  = errors.New("role already has child")
 	ErrNoChild       = errors.New("child does not exist")
-	ErrNoCachedRoler = errors.New("The parent is not CachedRoler!")
+	ErrNoCachedRoler = errors.New("parent is not CachedRoler!")
 )
 
 type CachedRoler interface {
@@ -74,14 +74,14 @@ func (r *CachedRole) RemoveChild(name string) error {
 }
 
 func (r *CachedRole) UpdateCache() {
-	allPerms := r.Role.AllPermissions()
+	perms := r.Role.AllPermissions()
 
 	r.mutex.Lock()
-	r.permsCache = allPerms
+	r.permsCache = perms
 	r.mutex.Unlock()
 
-	for _, c := range r.Children() {
-		c.UpdateCache()
+	for _, child := range r.Children() {
+		child.UpdateCache()
 	}
 }
 
