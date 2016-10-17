@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrRoleHasChild = errors.New("role already has child")
-	ErrNoChild      = errors.New("child does not exist")
+	ErrRoleHasChild  = errors.New("role already has child")
+	ErrNoChild       = errors.New("child does not exist")
+	ErrNoCachedRoler = errors.New("The parent is not CachedRoler!")
 )
 
 type CachedRoler interface {
@@ -118,7 +119,7 @@ func (r *CachedRole) Revoke(perm string) error {
 func (r *CachedRole) SetParent(role Roler) error {
 	c, ok := role.(CachedRoler)
 	if !ok {
-		return errors.New("Not CachedRoler!")
+		return ErrNoCachedRoler
 	}
 
 	if err := c.SetChild(r); err != nil {
