@@ -64,20 +64,20 @@ func setParents(newFunc NewFunc, t *testing.T) {
 	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleAdmin := newFunc("Admin")
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	parents := roleAdmin.AllParents()
@@ -106,20 +106,20 @@ func removeParents(newFunc NewFunc, t *testing.T) {
 	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleAdmin := newFunc("Admin")
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	err = roleUser.RemoveParent(roleNotApproved.Name())
@@ -154,20 +154,19 @@ func hasParent(newFunc NewFunc, t *testing.T) {
 	roleNotApproved := newFunc("NotApproved")
 	err := roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	roleAdmin := newFunc("Admin")
-
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if !roleAdmin.HasParent(roleUser.Name()) {
@@ -199,7 +198,7 @@ func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 	roleNotApproved := newFunc("NotApproved")
 	err = roleNotApproved.SetParent(roleGeneral)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	err = roleNotApproved.Permit(permNotApproved)
@@ -210,7 +209,7 @@ func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 	roleUser := newFunc("User")
 	err = roleUser.SetParent(roleNotApproved)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	err = roleUser.Permit(permUser)
@@ -226,7 +225,7 @@ func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 
 	err = roleAdmin.SetParent(roleUser)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if p := roleAdmin.Permissions(); !(p[permAdmin] && !p[permGeneral]) {
