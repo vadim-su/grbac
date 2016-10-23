@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	ErrRoleHasChild  = errors.New("role already has child")
 	ErrNoChild       = errors.New("child does not exist")
 	ErrNoCachedRoler = errors.New("parent is not CachedRoler!")
 )
@@ -14,8 +13,8 @@ var (
 type CachedRoler interface {
 	Roler
 	Children() map[string]CachedRoler
-	SetChild(CachedRoler) error
-	RemoveChild(string) error
+	SetChild(CachedRoler)
+	RemoveChild(string)
 	UpdateCache()
 }
 
@@ -48,29 +47,18 @@ func (r *CachedRole) Children() map[string]CachedRoler {
 	return newChildren
 }
 
-func (r *CachedRole) SetChild(child CachedRoler) error {
+func (r *CachedRole) SetChild(child CachedRoler) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-
-	if _, ok := r.children[child.Name()]; ok {
-		return ErrRoleHasChild
-	}
 
 	r.children[child.Name()] = child
-	return nil
 }
 
-func (r *CachedRole) RemoveChild(name string) error {
+func (r *CachedRole) RemoveChild(name string) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if _, ok := r.children[name]; !ok {
-		return ErrNoChild
-	}
-
 	delete(r.children, name)
-
-	return nil
 }
 
 func (r *CachedRole) UpdateCache() {
@@ -122,9 +110,7 @@ func (r *CachedRole) SetParent(role Roler) error {
 		return ErrNoCachedRoler
 	}
 
-	if err := c.SetChild(r); err != nil {
-		return err
-	}
+	c.SetChild(r)
 
 	if err := r.Role.SetParent(role); err != nil {
 		return err
@@ -137,9 +123,7 @@ func (r *CachedRole) SetParent(role Roler) error {
 func (r *CachedRole) RemoveParent(name string) error {
 	if p := r.GetParent(name); p != nil {
 		cachedP := p.(CachedRoler)
-		if err := cachedP.RemoveChild(r.Name()); err != nil {
-			return err
-		}
+		cachedP.RemoveChild(r.Name())
 	}
 
 	if err := r.Role.RemoveParent(name); err != nil {
