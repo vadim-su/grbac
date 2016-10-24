@@ -10,10 +10,10 @@ import (
 
 //Error codes returned by failures to change roles.
 var (
-	ErrRoleHasAlreadyPerm   = errors.New("role already has permission")
-	ErrRoleNotPerm          = errors.New("role does not have permission")
-	ErrRoleHasAlreadyParent = errors.New("role already has the parent")
-	ErrNoParent             = errors.New("parent does not exist")
+	ErrRoleHasPerm   = errors.New("role already has permission")
+	ErrRoleNotPerm   = errors.New("role does not have permission")
+	ErrRoleHasParent = errors.New("role already has the parent")
+	ErrNoParent      = errors.New("parent does not exist")
 )
 
 // Roler represents a role in RBAC and describes minimum set of functions
@@ -27,6 +27,7 @@ type Roler interface {
 	Revoke(string) error
 	Parents() map[string]Roler
 	AllParents() map[string]Roler
+	GetParent(string) Roler
 	HasParent(string) bool
 	SetParent(Roler) error
 	RemoveParent(string) error
@@ -99,7 +100,7 @@ func (r *Role) Permit(perm string) error {
 	defer r.mutex.Unlock()
 
 	if r.permissions[perm] {
-		return ErrRoleHasAlreadyPerm
+		return ErrRoleHasPerm
 	}
 	r.permissions[perm] = true
 	return nil
@@ -185,6 +186,15 @@ func (r *Role) AllParents() map[string]Roler {
 	return newParents
 }
 
+// GetParent returns the parent by the name if it is in this role.
+// If this parent is not in the role, the function returns nil
+func (r *Role) GetParent(name string) Roler {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	return r.parents[name]
+}
+
 // HasParent checks direct parent in the role
 func (r *Role) HasParent(name string) bool {
 	r.mutex.RLock()
@@ -201,7 +211,7 @@ func (r *Role) SetParent(role Roler) error {
 	defer r.mutex.Unlock()
 
 	if _, ok := r.parents[role.Name()]; ok {
-		return ErrRoleHasAlreadyParent
+		return ErrRoleHasParent
 	}
 
 	r.parents[role.Name()] = role
