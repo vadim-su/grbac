@@ -227,6 +227,48 @@ func getParent(newFunc NewFunc, t *testing.T) {
 	}
 }
 
+func getParents(newFunc NewFunc, t *testing.T) {
+	permA := "PermA"
+	permB := "PermB"
+	permC := "PermC"
+	permD := "PermD"
+
+	roleA := newFunc("RoleA")
+	roleA.Permit(permA)
+
+	roleB := newFunc("RoleB")
+	roleB.Permit(permB)
+	roleA.SetParent(roleB)
+
+	roleC := newFunc("RoleC")
+	roleC.Permit(permC)
+	roleA.SetParent(roleC)
+
+	roleD := newFunc("RoleD")
+	roleD.Permit(permD)
+	roleA.SetParent(roleD)
+
+	parents := roleA.Parents()
+
+	onError := func(roleName string) {
+		t.Errorf("expected that RoleA has %v as a perent", roleName)
+		t.Logf("RoleA parents: %v", roleA.AllParents())
+		t.FailNow()
+	}
+
+	if _, ok := parents[roleB.Name()]; !ok {
+		onError(roleB.Name())
+	}
+
+	if _, ok := parents[roleC.Name()]; !ok {
+		onError(roleC.Name())
+	}
+
+	if _, ok := parents[roleD.Name()]; !ok {
+		onError(roleD.Name())
+	}
+}
+
 func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 	permGeneral := "GeneralPerm"
 	permNotApproved := "NotApprovedPerm"
@@ -420,6 +462,14 @@ func TestDefaultRoleGetParent(t *testing.T) {
 
 func TestCachedRoleGetParent(t *testing.T) {
 	getParent(newCachedRole, t)
+}
+
+func TestDefaultRoleGetParents(t *testing.T) {
+	getParents(newRole, t)
+}
+
+func TestCachedRoleGetParents(t *testing.T) {
+	getParents(newCachedRole, t)
 }
 
 func TestDefaultRoleSetPermissionsForMultipleParents(t *testing.T) {
