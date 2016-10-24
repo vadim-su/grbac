@@ -210,7 +210,6 @@ func getParent(newFunc NewFunc, t *testing.T) {
 	if p := roleB.GetParent(roleA.Name()); p == nil {
 		t.Errorf("expected that RoleB has RoleA as a perent")
 		t.Logf("RoleB parents: %v", roleB.AllParents())
-
 	}
 
 	if p := roleB.GetParent("No Role!"); p != nil {
