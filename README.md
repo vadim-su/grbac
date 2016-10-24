@@ -14,7 +14,7 @@ go get -v github.com/deterok/grbac
 or
 
 ```sh
-go get -v gopkg.in/deterok/grbac.v0
+go get -v gopkg.in/deterok/grbac.v1
 ```
 
 ## Usage
