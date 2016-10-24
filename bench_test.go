@@ -83,11 +83,6 @@ func getParentOnLvl(root Roler, deep int) Roler {
 	return root
 }
 
-// func appendParent(root Roler, deep int, newParent Roler) {
-// 	parent := getParentOnLvl(root, deep)
-// 	parent.SetParent(newParent)
-// }
-
 func chainCheckPermissions(newFunc NewFunc, countParents, deep, countPerms, choiceLvl int, b *testing.B) {
 	rootRole := generateHierarchy(newFunc, countParents, deep, countPerms)
 
