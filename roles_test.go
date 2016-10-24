@@ -3,12 +3,17 @@ package grbac
 import "testing"
 
 type NewFunc func(string) Roler
+type NewCachedFunc func(string) CachedRoler
 
 func newRole(name string) Roler {
 	return NewRole(name)
 }
 
 func newCachedRole(name string) Roler {
+	return NewCachedRole(name)
+}
+
+func newCachedRoleCR(name string) CachedRoler {
 	return NewCachedRole(name)
 }
 
@@ -323,6 +328,40 @@ func isAllowedMultipleArguments(newFunc NewFunc, t *testing.T) {
 	}
 }
 
+func setChild(newFunc NewCachedFunc, t *testing.T) {
+	roleAdmin := newFunc("Admin")
+
+	roleUser := newFunc("User")
+	roleUser.SetChild(roleAdmin)
+
+	roleNotApproved := newFunc("NotApproved")
+	roleNotApproved.SetChild(roleUser)
+
+	roleGeneral := newFunc("General")
+	roleGeneral.SetChild(roleNotApproved)
+
+	onError := func(name string, children map[string]CachedRoler) {
+		t.Errorf("Children method returned an incorrect value:"+
+			" name \"%v\" not found", name)
+		t.Log(children)
+		t.FailNow()
+	}
+
+	rNA, NAOk := roleGeneral.Children()[roleNotApproved.Name()]
+	if !NAOk {
+		onError(roleNotApproved.Name(), roleGeneral.Children())
+	}
+
+	rUser, userOk := rNA.Children()[roleUser.Name()]
+	if !userOk {
+		onError(roleUser.Name(), rNA.Children())
+	}
+
+	if _, adminOk := rUser.Children()[roleAdmin.Name()]; !adminOk {
+		onError(roleAdmin.Name(), rUser.Children())
+	}
+}
+
 func TestDefaultRoleSetPermissions(t *testing.T) {
 	setPermissions(newRole, t)
 }
@@ -387,4 +426,6 @@ func TestCachedRoleIsAllowedMultipleArguments(t *testing.T) {
 	isAllowedMultipleArguments(newCachedRole, t)
 }
 
+func TestCachedRoleSetChild(t *testing.T) {
+	setChild(newCachedRoleCR, t)
 }
