@@ -183,6 +183,37 @@ func hasParent(newFunc NewFunc, t *testing.T) {
 	}
 }
 
+func getParent(newFunc NewFunc, t *testing.T) {
+	permA := "PermA"
+	permB := "PermB"
+
+	roleA := newFunc("RoleA")
+	roleA.Permit(permA)
+
+	roleB := newFunc("RoleB")
+	roleB.Permit(permB)
+	roleB.SetParent(roleA)
+
+	if p := roleB.GetParent(roleA.Name()); p == nil {
+		t.Errorf("expected that RoleB has RoleA as a perent")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+
+	}
+
+	if p := roleB.GetParent("No Role!"); p != nil {
+		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+
+	}
+
+	roleB.RemoveParent(roleA.Name())
+
+	if p := roleB.GetParent(roleA.Name()); p != nil {
+		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
+		t.Logf("RoleB parents: %v", roleB.AllParents())
+	}
+}
+
 func setPermissionsForMultipleParents(newFunc NewFunc, t *testing.T) {
 	permGeneral := "GeneralPerm"
 	permNotApproved := "NotApprovedPerm"
@@ -292,37 +323,6 @@ func isAllowedMultipleArguments(newFunc NewFunc, t *testing.T) {
 	}
 }
 
-func getParent(newFunc NewFunc, t *testing.T) {
-	permA := "PermA"
-	permB := "PermB"
-
-	roleA := newFunc("RoleA")
-	roleA.Permit(permA)
-
-	roleB := newFunc("RoleB")
-	roleB.Permit(permB)
-	roleB.SetParent(roleA)
-
-	if p := roleB.GetParent(roleA.Name()); p == nil {
-		t.Errorf("expected that RoleB has RoleA as a perent")
-		t.Logf("RoleB parents: %v", roleB.AllParents())
-
-	}
-
-	if p := roleB.GetParent("No Role!"); p != nil {
-		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
-		t.Logf("RoleB parents: %v", roleB.AllParents())
-
-	}
-
-	roleB.RemoveParent(roleA.Name())
-
-	if p := roleB.GetParent(roleA.Name()); p != nil {
-		t.Errorf("expected that RoleB does not have \"No Role\" in the parents")
-		t.Logf("RoleB parents: %v", roleB.AllParents())
-	}
-}
-
 func TestDefaultRoleSetPermissions(t *testing.T) {
 	setPermissions(newRole, t)
 }
@@ -363,6 +363,14 @@ func TestCachedRoleHasParent(t *testing.T) {
 	hasParent(newCachedRole, t)
 }
 
+func TestDefaultRoleGetParent(t *testing.T) {
+	getParent(newRole, t)
+}
+
+func TestCachedRoleGetParent(t *testing.T) {
+	getParent(newCachedRole, t)
+}
+
 func TestDefaultRoleSetPermissionsForMultipleParents(t *testing.T) {
 	setPermissionsForMultipleParents(newRole, t)
 }
@@ -379,10 +387,4 @@ func TestCachedRoleIsAllowedMultipleArguments(t *testing.T) {
 	isAllowedMultipleArguments(newCachedRole, t)
 }
 
-func TestDefaultRoleGetParent(t *testing.T) {
-	getParent(newRole, t)
-}
-
-func TestCachedRoleGetParent(t *testing.T) {
-	getParent(newCachedRole, t)
 }
