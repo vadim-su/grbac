@@ -105,6 +105,14 @@ func setParents(newFunc NewFunc, t *testing.T) {
 	}
 }
 
+func setNoCachedParent(newFunc NewCachedFunc, t *testing.T) {
+	roleGeneral := newFunc("General")
+	simpleRole := NewRole("SimpleRole")
+	if err := roleGeneral.SetParent(simpleRole); err != ErrNoCachedRoler {
+		t.Errorf("expected \"%v\"", ErrNoCachedRoler)
+	}
+}
+
 func removeParents(newFunc NewFunc, t *testing.T) {
 	roleGeneral := newFunc("General")
 
@@ -384,6 +392,10 @@ func TestDefaultRoleSetParent(t *testing.T) {
 
 func TestCachedRoleSetParent(t *testing.T) {
 	setParents(newCachedRole, t)
+}
+
+func TestCachedRoleSetNoCachedParent(t *testing.T) {
+	setNoCachedParent(newCachedRoleCR, t)
 }
 
 func TestDefaultRoleRemoveParent(t *testing.T) {
